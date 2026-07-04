@@ -10,6 +10,7 @@ interface AuthContextValue {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
+  reloadProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -31,6 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => listener.subscription.unsubscribe()
   }, [])
+
+  async function reloadProfile() {
+    const uid = session?.user?.id
+    if (!uid) return
+    const { data } = await supabase.from('profiles').select('*').eq('id', uid).single()
+    setProfile(data as Profile | null)
+  }
 
   useEffect(() => {
     if (!session?.user) {
@@ -56,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, user: session?.user ?? null, profile, loading, signIn, signOut }}
+      value={{ session, user: session?.user ?? null, profile, loading, signIn, signOut, reloadProfile }}
     >
       {children}
     </AuthContext.Provider>

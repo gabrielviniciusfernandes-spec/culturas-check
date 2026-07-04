@@ -5,12 +5,14 @@ import { STATUS_LABELS, STATUS_ORDER, getCultureStatus } from '../lib/dates'
 import { CultureCard } from './CultureCard'
 import { NewCultureModal } from './NewCultureModal'
 import { CultureDetailModal } from './CultureDetailModal'
+import { AccountModal } from './AccountModal'
 import type { CultureStatus, CultureWithRelations } from '../types'
 
 export function Dashboard() {
   const { profile, signOut } = useAuth()
   const { cultures, examTypes, patients, loading, error, reload } = useCultures()
   const [showNew, setShowNew] = useState(false)
+  const [showAccount, setShowAccount] = useState(false)
   const [selected, setSelected] = useState<CultureWithRelations | null>(null)
   const [search, setSearch] = useState('')
 
@@ -38,13 +40,17 @@ export function Dashboard() {
     <div className="min-h-screen bg-[#F7F3EC]">
       <header className="sticky top-0 z-30 bg-[#F7F3EC]/80 backdrop-blur-xl border-b border-teal-100/60">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => setShowAccount(true)}
+            className="flex items-center gap-3 min-w-0 text-left rounded-xl -m-1 p-1 hover:bg-white/60 transition-colors"
+            title="Minha conta"
+          >
             <img src="/logo.svg" alt="" className="w-9 h-9 rounded-xl shadow-soft shrink-0" />
             <div className="min-w-0">
               <h1 className="text-lg font-semibold text-ink leading-tight truncate">CulturasCheck</h1>
               <p className="text-xs text-teal-500 truncate">{profile?.full_name ?? '—'}</p>
             </div>
-          </div>
+          </button>
           <div className="flex items-center gap-2 shrink-0">
             {alertCount > 0 && (
               <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
@@ -129,6 +135,8 @@ export function Dashboard() {
           onDeleted={reload}
         />
       )}
+
+      {showAccount && <AccountModal onClose={() => setShowAccount(false)} />}
     </div>
   )
 }
