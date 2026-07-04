@@ -228,6 +228,23 @@ create trigger cultures_audit_trigger
   for each row execute procedure public.log_culture_change();
 
 -- ============================================================
+-- PRIVILÉGIOS DE TABELA (GRANTs)
+-- ============================================================
+-- O RLS (policies acima) só é avaliado DEPOIS que o papel tem privilégio
+-- na tabela. Em alguns projetos Supabase os grants padrão para 'authenticated'
+-- não vêm aplicados — sem estes GRANTs o app falha mesmo com o usuário logado.
+-- Concedemos acesso apenas a 'authenticated'; 'anon' (não logado) fica sem
+-- acesso a dados de pacientes, por segurança/LGPD.
+
+grant usage on schema public to authenticated;
+
+grant select, insert, update on public.profiles          to authenticated;
+grant select                  on public.exam_types        to authenticated;
+grant select, insert, update on public.patients          to authenticated;
+grant select, insert, update on public.cultures          to authenticated;
+grant select                  on public.cultures_audit_log to authenticated;
+
+-- ============================================================
 -- NOTAS DE SEGURANÇA / LGPD
 -- ============================================================
 -- 1. No dashboard do Supabase, restrinja o cadastro de contas (Auth > Providers)
