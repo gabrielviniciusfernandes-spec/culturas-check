@@ -73,16 +73,16 @@ create policy "exam_types_select_authenticated"
   using (true);
 
 insert into public.exam_types (code, name, category, default_turnaround_days, notes, sort_order) values
-  ('hemocultura',        'Hemocultura',                              'bacteriologia', 5,  'Automatizada: negativa liberada em ~5 dias; positiva pode sinalizar antes.', 1),
+  ('hemocultura',        'Hemocultura',                              'bacteriologia', 3,  'Automatizada; checar em ~3 dias. Positiva pode sinalizar antes.', 1),
   ('urocultura',         'Urocultura',                               'bacteriologia', 3,  'Resultado usual em 48–72h.', 2),
   ('cultura_vigilancia', 'Cultura de vigilância (swab retal/KPC)',   'bacteriologia', 3,  'Rastreio de multirresistentes, 48–72h.', 3),
   ('cultura_secrecao',   'Cultura de secreção/ferida',                'bacteriologia', 3,  '48–72h.', 4),
   ('cultura_liquor',     'Cultura de líquor',                         'bacteriologia', 5,  '~5 dias.', 5),
-  ('pcr_tb_lavado',      'PCR tuberculose — lavado gástrico',        'micobacteria',  2,  'GeneXpert, resultado rápido.', 6),
-  ('pcr_tb_escarro',     'PCR tuberculose — escarro',                 'micobacteria',  2,  'GeneXpert, resultado rápido.', 7),
+  ('pcr_tb_lavado',      'PCR tuberculose — lavado gástrico',        'micobacteria',  5,  'GeneXpert; checar em ~5 dias.', 6),
+  ('pcr_tb_escarro',     'PCR tuberculose — escarro',                 'micobacteria',  5,  'GeneXpert; checar em ~5 dias.', 7),
   ('baar_escarro',       'Baciloscopia (BAAR) — escarro',             'micobacteria',  1,  '24–48h.', 8),
   ('cultura_bk',         'Cultura para BK (Löwenstein-Jensen)',       'micobacteria',  42, 'Lenta: 6–8 semanas.', 9),
-  ('cultura_fungos',     'Cultura para fungos',                       'fungos',        21, '2–4 semanas.', 10)
+  ('cultura_fungos',     'Cultura para fungos',                       'fungos',        10, 'Checar em ~10 dias.', 10)
 on conflict (code) do nothing;
 
 -- ============================================================
