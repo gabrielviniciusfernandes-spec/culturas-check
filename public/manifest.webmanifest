@@ -1,0 +1,12 @@
+{
+  "name": "CulturasCheck",
+  "short_name": "CulturasCheck",
+  "description": "Monitoramento de datas de checagem de culturas microbiológicas e PCR de tuberculose",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F3EC",
+  "theme_color": "#2E6E85",
+  "icons": [
+    { "src": "/logo.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
