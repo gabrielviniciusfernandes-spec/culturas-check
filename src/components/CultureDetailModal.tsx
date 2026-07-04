@@ -8,6 +8,7 @@ interface Props {
   culture: CultureWithRelations
   onClose: () => void
   onUpdated: () => void
+  onDeleted: () => void
 }
 
 const CONDUCT_OPTIONS: { value: Conduct; label: string }[] = [
@@ -16,8 +17,9 @@ const CONDUCT_OPTIONS: { value: Conduct; label: string }[] = [
   { value: 'antibiotico', label: 'Antibiótico' },
 ]
 
-export function CultureDetailModal({ culture, onClose, onUpdated }: Props) {
+export function CultureDetailModal({ culture, onClose, onUpdated, onDeleted }: Props) {
   const { user } = useAuth()
+  const [deleting, setDeleting] = useState(false)
 
   const [collectionDate, setCollectionDate] = useState(culture.collection_date ?? '')
   const [expectedResultDate, setExpectedResultDate] = useState(culture.expected_result_date)
@@ -68,6 +70,41 @@ export function CultureDetailModal({ culture, onClose, onUpdated }: Props) {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  async function handleDeleteCulture() {
+    if (!window.confirm(`Excluir esta cultura (${culture.exam_type.name}) de ${culture.patient.name}? Esta ação não pode ser desfeita.`))
+      return
+    setError(null)
+    setDeleting(true)
+    const { error } = await supabase.from('cultures').delete().eq('id', culture.id)
+    setDeleting(false)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    onDeleted()
+    onClose()
+  }
+
+  async function handleDeletePatient() {
+    if (
+      !window.confirm(
+        `Excluir o paciente ${culture.patient.name} e TODAS as suas culturas? Esta ação não pode ser desfeita.`
+      )
+    )
+      return
+    setError(null)
+    setDeleting(true)
+    // cultures têm ON DELETE CASCADE → removidas junto com o paciente
+    const { error } = await supabase.from('patients').delete().eq('id', culture.patient.id)
+    setDeleting(false)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    onDeleted()
+    onClose()
   }
 
   return (
@@ -180,11 +217,33 @@ export function CultureDetailModal({ culture, onClose, onUpdated }: Props) {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || deleting}
             className="w-full bg-teal-500 hover:bg-teal-600 active:scale-[0.98] transition-all text-white font-medium rounded-xl2 py-2.5 shadow-soft disabled:opacity-60"
           >
             {submitting ? 'Salvando…' : 'Salvar alterações'}
           </button>
+
+          <div className="pt-4 mt-2 border-t border-red-100">
+            <p className="text-xs font-medium text-red-400 mb-2 ml-1">Zona de perigo</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleDeleteCulture}
+                disabled={submitting || deleting}
+                className="w-full text-red-600 bg-red-50 hover:bg-red-100 active:scale-[0.98] transition-all font-medium rounded-xl2 py-2.5 disabled:opacity-60"
+              >
+                Excluir esta cultura
+              </button>
+              <button
+                type="button"
+                onClick={handleDeletePatient}
+                disabled={submitting || deleting}
+                className="w-full text-red-700 bg-red-100 hover:bg-red-200 active:scale-[0.98] transition-all font-medium rounded-xl2 py-2.5 disabled:opacity-60"
+              >
+                Excluir paciente e culturas
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>

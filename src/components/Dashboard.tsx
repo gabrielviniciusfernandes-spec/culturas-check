@@ -122,7 +122,12 @@ export function Dashboard() {
       )}
 
       {selected && (
-        <CultureDetailModal culture={selected} onClose={() => setSelected(null)} onUpdated={reload} />
+        <CultureDetailModal
+          culture={selected}
+          onClose={() => setSelected(null)}
+          onUpdated={reload}
+          onDeleted={reload}
+        />
       )}
     </div>
   )

@@ -117,6 +117,11 @@ create policy "patients_update_authenticated"
   using (true)
   with check (true);
 
+create policy "patients_delete_authenticated"
+  on public.patients for delete
+  to authenticated
+  using (true);
+
 -- ============================================================
 -- CULTURAS / EXAMES SOLICITADOS
 -- ============================================================
@@ -169,6 +174,11 @@ create policy "cultures_update_authenticated"
   to authenticated
   using (true)
   with check (true);
+
+create policy "cultures_delete_authenticated"
+  on public.cultures for delete
+  to authenticated
+  using (true);
 
 -- updated_at automático
 create or replace function public.touch_updated_at()
@@ -227,6 +237,25 @@ create trigger cultures_audit_trigger
   after update on public.cultures
   for each row execute procedure public.log_culture_change();
 
+-- registra também as EXCLUSÕES (LGPD): quem apagou e o conteúdo apagado.
+-- Também dispara em cascata quando um paciente é excluído.
+create or replace function public.log_culture_delete()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.cultures_audit_log (culture_id, changed_by, old_row, new_row)
+  values (old.id, auth.uid(), to_jsonb(old), null);
+  return old;
+end;
+$$;
+
+drop trigger if exists cultures_audit_delete_trigger on public.cultures;
+create trigger cultures_audit_delete_trigger
+  after delete on public.cultures
+  for each row execute procedure public.log_culture_delete();
+
 -- ============================================================
 -- PRIVILÉGIOS DE TABELA (GRANTs)
 -- ============================================================
@@ -240,9 +269,9 @@ grant usage on schema public to authenticated;
 
 grant select, insert, update on public.profiles          to authenticated;
 grant select                  on public.exam_types        to authenticated;
-grant select, insert, update on public.patients          to authenticated;
-grant select, insert, update on public.cultures          to authenticated;
-grant select                  on public.cultures_audit_log to authenticated;
+grant select, insert, update, delete on public.patients          to authenticated;
+grant select, insert, update, delete on public.cultures          to authenticated;
+grant select                         on public.cultures_audit_log to authenticated;
 
 -- ============================================================
 -- NOTAS DE SEGURANÇA / LGPD
